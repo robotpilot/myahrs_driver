@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+  <name>myahrs_driver</name>
+  <version>0.0.1</version>
+  <license>BSD</license>
+  <description>The myahrs_driver package</description>
+
+  <maintainer email="passionvirus@gmail.com">Yoonseok Pyo</maintainer>
+
+  <url type="git">https://github.com/robotpilot/myahrs_driver</url>
+
+  <author email="passionvirus@gmail.com">Yoonseok Pyo</author>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+
+  <export>
+  </export>
+</package>
