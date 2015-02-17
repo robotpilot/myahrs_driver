@@ -26,6 +26,7 @@ target_link_libraries(myahrs_driver ${catkin_LIBRARIES})
 # but code of "myAHRS SDK" must compile with C++11.
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
+
 #############
 ## Install ##
 #############

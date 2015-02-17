@@ -27,7 +27,7 @@
 *.out
 *.app
 
-
+# User
 *.*~
 *.bak
 .svn

@@ -1,4 +1,5 @@
 #include <myahrs_driver/myahrs_driver.hpp>
+#include <sensor_msgs/Imu.h>
 
 using namespace WithRobot;
 
@@ -19,9 +20,17 @@ class UserDefinedAhrs : public iMyAhrsPlus
 
 public:
     int sample_count;
+  ros::Publisher data_pub;
+  sensor_msgs::Imu imu_data;
 
     UserDefinedAhrs(std::string port="", unsigned int baudrate=115200)
-    : iMyAhrsPlus(port, baudrate), sample_count(0) {}
+    : iMyAhrsPlus(port, baudrate),
+      sample_count(0),
+      nh_priv("~")
+    {
+
+    data_pub = nh_priv.advertise<sensor_msgs::Imu>("imu_publisher", 10);
+    }
     ~UserDefinedAhrs() {}
 
     bool initialize() {
@@ -63,9 +72,33 @@ public:
                 imu.ax, imu.ay, imu.az,
                 imu.gx, imu.gy, imu.gz,
                 imu.mx, imu.my, imu.mz);
+
+    ros::Time now = ros::Time::now();
+    sensor_msgs::Imu imu_msg;
+    imu_msg.header.stamp = now;
+
+    imu_msg.header.frame_id = "test";
+
+    imu_msg.orientation.x = q.x;
+    imu_msg.orientation.y = q.y;
+    imu_msg.orientation.z = q.z;
+    imu_msg.orientation.w = q.w;
+
+    imu_msg.angular_velocity.x = imu.gx;
+    imu_msg.angular_velocity.y = imu.gy;
+    imu_msg.angular_velocity.z = imu.gz;
+
+    imu_msg.linear_acceleration.x = imu.ax;
+    imu_msg.linear_acceleration.y = imu.ay;
+    imu_msg.linear_acceleration.z = imu.az;
+
+    data_pub.publish(imu_msg);
+
     }
 
 protected:
+  ros::NodeHandle nh;
+  ros::NodeHandle nh_priv;
     /*
      * 	override event handler
      */
@@ -99,7 +132,7 @@ void ex5_user_defined_class(const char* serial_device, int baudrate)
         handle_error("initialize() returns false");
     }
 
-    while(sensor.sample_count < 300) {
+    while(1) {
         Platform::msleep(100);
     }
 
