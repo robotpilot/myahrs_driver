@@ -22,6 +22,10 @@ add_executable(myahrs_driver src/myahrs_driver.cpp)
 add_dependencies(myahrs_driver myahrs_driver_generate_messages_cpp)
 target_link_libraries(myahrs_driver ${catkin_LIBRARIES})
 
+# I knew the REP0003(http://www.ros.org/reps/rep-0003.html#c),
+# but code of "myAHRS SDK" must compile with C++11.
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+
 #############
 ## Install ##
 #############

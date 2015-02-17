@@ -3,7 +3,6 @@
 
 #include <ros/ros.h>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <myahrs_driver/myahrs_plus.hpp>
 
 #endif // __MYAHRS_DRIVER_H_
