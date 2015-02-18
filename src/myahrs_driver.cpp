@@ -1,6 +1,35 @@
 //------------------------------------------------------------------------------
-#include <myahrs_driver/myahrs_driver.hpp>
+// Copyright (c) 2015, Yoonseok Pyo
+// All rights reserved.
 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+
+// * Neither the name of myahrs_driver nor the names of its
+//   contributors may be used to endorse or promote products derived from
+//   this software without specific prior written permission.
+
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//------------------------------------------------------------------------------
+#include <myahrs_driver/myahrs_plus.hpp>
+
+#include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <tf/transform_broadcaster.h>
 
@@ -8,7 +37,6 @@
 using namespace WithRobot;
 
 //------------------------------------------------------------------------------
-static const int BAUDRATE = 115200;
 static const char* DIVIDER = "1";  // 100 Hz
 
 #define DEG2RAD (M_PI/180.0)
@@ -20,7 +48,7 @@ void handle_error(const char* error_msg)
 }
 
 //------------------------------------------------------------------------------
-class UserDefinedAhrs : public iMyAhrsPlus
+class MyAhrsDriverForROS : public iMyAhrsPlus
 {
 private:
   ros::NodeHandle nh;
@@ -35,7 +63,7 @@ private:
       sensor_data.euler_angle = sensor_data.quaternion.to_euler_angle();
     }
 
-    do_something(sensor_id);
+    publish_topic(sensor_id);
   }
 
   void OnAttributeChange(int sensor_id, std::string attribute_name, std::string value)
@@ -51,15 +79,33 @@ public:
   SensorData sensor_data;
   tf::TransformBroadcaster broadcaster;
 
-  UserDefinedAhrs(std::string port="", unsigned int baudrate=115200)
+  std::string port;
+  int baud_rate;
+  std::string frame_id;
+  bool autocalibrate;
+  double linear_acceleration_stddev;
+  double angular_velocity_stddev;
+  double magnetic_field_stddev;
+  double orientation_stddev;
+
+  MyAhrsDriverForROS(std::string port="", unsigned int baudrate=115200)
   : iMyAhrsPlus(port, baudrate),
     sample_count(0),
     nh_priv("~")
   {
+    nh_priv.param("port", port, std::string("/dev/ttyACM0"));
+    nh_priv.param("baud", baud_rate, 115200);
+    nh_priv.param("frame_id", frame_id, std::string("imu_link"));
+    nh_priv.param("autocalibrate", autocalibrate, false);
+    nh_priv.param("linear_acceleration_stddev", linear_acceleration_stddev, 0.0);
+    nh_priv.param("angular_velocity_stddev", angular_velocity_stddev, 0.0);
+    nh_priv.param("magnetic_field_stddev", magnetic_field_stddev, 0.0);
+    nh_priv.param("orientation_stddev", orientation_stddev, 0.0);
+
     data_pub = nh_priv.advertise<sensor_msgs::Imu>("imu_publisher", 10);
   }
 
-  ~UserDefinedAhrs()
+  ~MyAhrsDriverForROS()
   {}
 
   bool initialize()
@@ -90,7 +136,7 @@ public:
     return sensor_data;
   }
 
-  void do_something(int sensor_id)
+  void publish_topic(int sensor_id)
   {
     std::string line(50, '-');
     printf("%s\n", line.c_str());
@@ -135,12 +181,13 @@ public:
   }
 };
 
-//------------------------------------------------------------------------------
-void test(const char* serial_device, int baudrate)
-{
-  printf("\n### %s() ###\n", __FUNCTION__);
 
-  UserDefinedAhrs sensor(serial_device, baudrate);
+//------------------------------------------------------------------------------
+int main(int argc, char* argv[])
+{
+  ros::init(argc, argv, "myahrs_driver");
+
+  MyAhrsDriverForROS sensor(sensor.port, sensor.baud_rate);
 
   if(sensor.initialize() == false)
   {
@@ -151,16 +198,6 @@ void test(const char* serial_device, int baudrate)
   {
     Platform::msleep(100);
   }
-
-  printf("END OF TEST(%s)\n\n", __FUNCTION__);
-}
-
-//------------------------------------------------------------------------------
-int main(int argc, char* argv[])
-{
-  ros::init(argc, argv, "myahrs_driver");
-
-  test("/dev/ttyACM1", BAUDRATE);
 
 //  ros::spin();
   return 0;

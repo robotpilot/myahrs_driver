@@ -750,9 +750,9 @@ namespace WithRobot {
 
                 // end of frame
                 case MSG_TAIL_LF:
-                	if(frame_buffer.offset > 0) {
-                		parse_message(reinterpret_cast<const char*>(frame_buffer.buffer));
-                	}
+                        if(frame_buffer.offset > 0) {
+                                parse_message(reinterpret_cast<const char*>(frame_buffer.buffer));
+                        }
                     frame_buffer.reset();
                     break;
 
@@ -1291,16 +1291,10 @@ namespace WithRobot {
 
         EulerAngle to_euler_angle() {
             EulerAngle e;
-
-//            double RAD2DEG = 180/M_PI;
-//            e.roll  = atan2(MAT(1, 2), MAT(2, 2))*RAD2DEG;
-//            e.pitch = -asin(MAT(0, 2))*RAD2DEG;
-//            e.yaw   = atan2(MAT(0, 1), MAT(0, 0))*RAD2DEG;
-
-            e.roll  = atan2(MAT(1, 2), MAT(2, 2));
-            e.pitch = -asin(MAT(0, 2));
-            e.yaw   = atan2(MAT(0, 1), MAT(0, 0));
-
+            double RAD2DEG = 180/M_PI;
+            e.roll  = atan2(MAT(1, 2), MAT(2, 2))*RAD2DEG;
+            e.pitch = -asin(MAT(0, 2))*RAD2DEG;
+            e.yaw   = atan2(MAT(0, 1), MAT(0, 0))*RAD2DEG;
             return e;
         }
 
@@ -1426,17 +1420,11 @@ namespace WithRobot {
             double zw = z*w;
             double ww = w*w;
 
+            double RAD2DEG = 180/M_PI;
             EulerAngle e;
-
-//            double RAD2DEG = 180/M_PI;
-//            e.roll  = atan2(2.0*(yz + xw), -xx - yy + zz + ww)*RAD2DEG;
-//            e.pitch = -asin(2.0*(xz - yw))*RAD2DEG;
-//            e.yaw   = atan2(2.0*(xy + zw), xx - yy - zz + ww)*RAD2DEG;
-
-            e.roll  = atan2(2.0*(yz + xw), -xx - yy + zz + ww);
-            e.pitch = -asin(2.0*(xz - yw));
-            e.yaw   = atan2(2.0*(xy + zw), xx - yy - zz + ww);
-
+            e.roll  = atan2(2.0*(yz + xw), -xx - yy + zz + ww)*RAD2DEG;
+            e.pitch = -asin(2.0*(xz - yw))*RAD2DEG;
+            e.yaw   = atan2(2.0*(xy + zw), xx - yy - zz + ww)*RAD2DEG;
             return e;
         }
 
@@ -1714,12 +1702,12 @@ namespace WithRobot {
             }
 
             bool wait(int timeout_msec) {
-            	if(size() <= 0) {
-            		return event.wait(timeout_msec);
-            	}
-            	else {
-            		return true;
-            	}
+                if(size() <= 0) {
+                        return event.wait(timeout_msec);
+                }
+                else {
+                        return true;
+                }
             }
 
             void push_back(std::vector<std::string>& list) {
@@ -2304,7 +2292,7 @@ namespace WithRobot {
 			std::vector<std::string> tokens;
 			std::vector<std::string> cmd_tokens;
 
-            do {
+	    do {
 				/*
 				 * wait for response
 				 */
@@ -2344,7 +2332,7 @@ namespace WithRobot {
 					DBG_PRINTF(debug, "ERROR: invalid response. command %s, response %s)\n", cmd_tokens[0].c_str(), tokens[0].c_str());
 					continue;
 				}
-            }while(1);
+	    }while(1);
 
 
             /*
@@ -2372,7 +2360,7 @@ namespace WithRobot {
                 }
 
                 if(res) {
-                	DBG_PRINTF(debug, "### OK : message hander returns true. command %s, rcvq_sz %d)\n", cmd_tokens[0].c_str(), response_message_queue.size());
+                        DBG_PRINTF(debug, "### OK : message hander returns true. command %s, rcvq_sz %d)\n", cmd_tokens[0].c_str(), response_message_queue.size());
                 }
 
                 return res;
