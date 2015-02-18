@@ -1291,10 +1291,16 @@ namespace WithRobot {
 
         EulerAngle to_euler_angle() {
             EulerAngle e;
-            double RAD2DEG = 180/M_PI;
-            e.roll  = atan2(MAT(1, 2), MAT(2, 2))*RAD2DEG;
-            e.pitch = -asin(MAT(0, 2))*RAD2DEG;
-            e.yaw   = atan2(MAT(0, 1), MAT(0, 0))*RAD2DEG;
+
+//            double RAD2DEG = 180/M_PI;
+//            e.roll  = atan2(MAT(1, 2), MAT(2, 2))*RAD2DEG;
+//            e.pitch = -asin(MAT(0, 2))*RAD2DEG;
+//            e.yaw   = atan2(MAT(0, 1), MAT(0, 0))*RAD2DEG;
+
+            e.roll  = atan2(MAT(1, 2), MAT(2, 2));
+            e.pitch = -asin(MAT(0, 2));
+            e.yaw   = atan2(MAT(0, 1), MAT(0, 0));
+
             return e;
         }
 
@@ -1420,11 +1426,17 @@ namespace WithRobot {
             double zw = z*w;
             double ww = w*w;
 
-            double RAD2DEG = 180/M_PI;
             EulerAngle e;
-            e.roll  = atan2(2.0*(yz + xw), -xx - yy + zz + ww)*RAD2DEG;
-            e.pitch = -asin(2.0*(xz - yw))*RAD2DEG;
-            e.yaw   = atan2(2.0*(xy + zw), xx - yy - zz + ww)*RAD2DEG;
+
+//            double RAD2DEG = 180/M_PI;
+//            e.roll  = atan2(2.0*(yz + xw), -xx - yy + zz + ww)*RAD2DEG;
+//            e.pitch = -asin(2.0*(xz - yw))*RAD2DEG;
+//            e.yaw   = atan2(2.0*(xy + zw), xx - yy - zz + ww)*RAD2DEG;
+
+            e.roll  = atan2(2.0*(yz + xw), -xx - yy + zz + ww);
+            e.pitch = -asin(2.0*(xz - yw));
+            e.yaw   = atan2(2.0*(xy + zw), xx - yy - zz + ww);
+
             return e;
         }
 
