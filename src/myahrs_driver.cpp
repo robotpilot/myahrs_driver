@@ -1,6 +1,8 @@
 //------------------------------------------------------------------------------
 #include <myahrs_driver/myahrs_driver.hpp>
+
 #include <sensor_msgs/Imu.h>
+#include <tf/transform_broadcaster.h>
 
 //------------------------------------------------------------------------------
 using namespace WithRobot;
@@ -47,6 +49,7 @@ public:
   sensor_msgs::Imu imu_data;
   Platform::Mutex lock;
   SensorData sensor_data;
+  tf::TransformBroadcaster broadcaster;
 
   UserDefinedAhrs(std::string port="", unsigned int baudrate=115200)
   : iMyAhrsPlus(port, baudrate),
@@ -109,7 +112,7 @@ public:
     sensor_msgs::Imu imu_msg;
     imu_msg.header.stamp = now;
 
-    imu_msg.header.frame_id = "test";
+    imu_msg.header.frame_id = "imu_base";
 
     imu_msg.orientation.x = q.x;
     imu_msg.orientation.y = q.y;
@@ -125,6 +128,10 @@ public:
     imu_msg.linear_acceleration.z = imu.az * 9.80665;
 
     data_pub.publish(imu_msg);
+
+    broadcaster.sendTransform(tf::StampedTransform(tf::Transform(tf::createQuaternionFromRPY(e.roll, -e.pitch, -e.yaw),
+                                                                 tf::Vector3(0.0, 0.0, 0.1)),
+                                                   ros::Time::now(), "imu_base", "imu"));
   }
 };
 
