@@ -30,6 +30,7 @@
 #include <myahrs_driver/myahrs_plus.hpp>
 
 #include <ros/ros.h>
+#include <std_msgs/Float64.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/MagneticField.h>
 #include <tf/transform_broadcaster.h>
@@ -53,7 +54,6 @@ private:
   ros::NodeHandle nh_priv_;
 
   std::string frame_id_;
-  bool autocalibrate_;
   double linear_acceleration_stddev_;
   double angular_velocity_stddev_;
   double magnetic_field_stddev_;
@@ -72,8 +72,10 @@ private:
   }
 
 public:
+  ros::Publisher imu_data_raw_pub_;
   ros::Publisher imu_data_pub_;
   ros::Publisher imu_mag_pub_;
+  ros::Publisher imu_temperature_pub_;
   Platform::Mutex lock_;
   SensorData sensor_data_;
   tf::TransformBroadcaster broadcaster_;
@@ -88,14 +90,15 @@ public:
     nh_priv_.param("port", port_, std::string("/dev/ttyACM0"));
     nh_priv_.param("baud", baud_rate_, 115200);
     nh_priv_.param("frame_id", frame_id_, std::string("imu_link"));
-    nh_priv_.param("autocalibrate", autocalibrate_, false);
     nh_priv_.param("linear_acceleration_stddev", linear_acceleration_stddev_, 0.0);
     nh_priv_.param("angular_velocity_stddev", angular_velocity_stddev_, 0.0);
     nh_priv_.param("magnetic_field_stddev", magnetic_field_stddev_, 0.0);
     nh_priv_.param("orientation_stddev", orientation_stddev_, 0.0);
 
-    imu_data_pub_ = nh_.advertise<sensor_msgs::Imu>("imu/data", 1);
-    imu_mag_pub_  = nh_.advertise<sensor_msgs::MagneticField>("imu/mag", 1);
+    imu_data_raw_pub_   = nh_.advertise<sensor_msgs::Imu>("imu/data_raw", 1);
+    imu_data_pub_       = nh_.advertise<sensor_msgs::Imu>("imu/data", 1);
+    imu_mag_pub_        = nh_.advertise<sensor_msgs::MagneticField>("imu/mag", 1);
+    imu_temperature_pub_= nh_.advertise<std_msgs::Float64>("imu/temperature", 1);
   }
 
   ~MyAhrsDriverForROS()
@@ -135,7 +138,6 @@ public:
 
   void publish_topic(int sensor_id)
   {
-    printf(".");
     static double convertor_g2a  = 9.80665;    // for linear_acceleration (g to m/s^2)
     static double convertor_d2r  = M_PI/180.0; // for angular_velocity (degree to radian)
     static double convertor_r2d  = 180.0/M_PI; // for easy understanding (radian to degree)
@@ -143,6 +145,7 @@ public:
     static double convertor_c    = 1;          // for temperature (celsius)
 
     double roll, pitch, yaw;
+
     // original sensor data used the degree unit, convert to radian (see ROS REP103)
     // we used the ROS's axis orientation like x forward, y left and z up
     // so changed the y and z aixs of myAHRS+ board
@@ -154,51 +157,59 @@ public:
 
     ImuData<float>& imu = sensor_data_.imu;
 
-//    printf("sensor_id %d, Quaternion(xyzw)=%.4f,%.4f,%.4f,%.4f, Angle(rpy)=%.1f, %.1f, %.1f, Accel(xyz)=%.4f,%.4f,%.4f, Gyro(xyz)=%.4f,%.4f,%.4f, Magnet(xyz)=%.2f,%.2f,%.2f\n",
-//      sensor_id,
-//      q.x, q.y, q.z, q.w,
-//      e.roll, e.pitch, e.yaw,
-//      imu.ax, imu.ay, imu.az,
-//      imu.gx, imu.gy, imu.gz,
-//      imu.mx, imu.my, imu.mz);
-
     ros::Time now = ros::Time::now();
 
-    sensor_msgs::Imu imu_msg;
-    sensor_msgs::MagneticField magnetic_msg;
+    sensor_msgs::Imu imu_data_raw_msg;
+    sensor_msgs::Imu imu_data_msg;
+    sensor_msgs::MagneticField imu_magnetic_msg;
+    std_msgs::Float64 imu_temperature_msg;
 
-    imu_msg.header.stamp = now;
-    magnetic_msg.header.stamp = now;
+    nh_priv_.getParam("frame_id", frame_id_);
 
-    imu_msg.header.frame_id = "imu_base";
-    magnetic_msg.header.frame_id = "imu_base";
+    imu_data_raw_msg.header.stamp = now;
+    imu_data_msg.header.stamp = now;
+    imu_magnetic_msg.header.stamp = now;
+
+    imu_data_raw_msg.header.frame_id = frame_id_;
+    imu_data_msg.header.frame_id = frame_id_;
+    imu_magnetic_msg.header.frame_id = frame_id_;
 
     // orientation
-    imu_msg.orientation.x = orientation[0];
-    imu_msg.orientation.y = orientation[1];
-    imu_msg.orientation.z = orientation[2];
-    imu_msg.orientation.w = orientation[3];
+    imu_data_msg.orientation.x = orientation[0];
+    imu_data_msg.orientation.y = orientation[1];
+    imu_data_msg.orientation.z = orientation[2];
+    imu_data_msg.orientation.w = orientation[3];
 
     // original data used the g unit, convert to m/s^2
-    imu_msg.linear_acceleration.x = imu.ax * convertor_g2a;
-    imu_msg.linear_acceleration.y = imu.ay * convertor_g2a;
-    imu_msg.linear_acceleration.z = imu.az * convertor_g2a;
+    imu_data_raw_msg.linear_acceleration.x =
+    imu_data_msg.linear_acceleration.x     = imu.ax * convertor_g2a;
+    imu_data_raw_msg.linear_acceleration.y =
+    imu_data_msg.linear_acceleration.y     = imu.ay * convertor_g2a;
+    imu_data_raw_msg.linear_acceleration.z =
+    imu_data_msg.linear_acceleration.z     = imu.az * convertor_g2a;
 
     // original data used the degree/s unit, convert to radian/s
-    imu_msg.angular_velocity.x = imu.gx * convertor_d2r;
-    imu_msg.angular_velocity.y = imu.gy * convertor_d2r;
-    imu_msg.angular_velocity.z = imu.gz * convertor_d2r;
+    imu_data_raw_msg.angular_velocity.x =
+    imu_data_msg.angular_velocity.x     = imu.gx * convertor_d2r;
+    imu_data_raw_msg.angular_velocity.y =
+    imu_data_msg.angular_velocity.y     = imu.gy * convertor_d2r;
+    imu_data_raw_msg.angular_velocity.z =
+    imu_data_msg.angular_velocity.z     = imu.gz * convertor_d2r;
 
     // original data used the uTesla unit, convert to Tesla
-    magnetic_msg.magnetic_field.x = imu.mx * convertor_ut2t;
-    magnetic_msg.magnetic_field.y = imu.mx * convertor_ut2t;
-    magnetic_msg.magnetic_field.z = imu.mx * convertor_ut2t;
+    imu_magnetic_msg.magnetic_field.x = imu.mx * convertor_ut2t;
+    imu_magnetic_msg.magnetic_field.y = imu.mx * convertor_ut2t;
+    imu_magnetic_msg.magnetic_field.z = imu.mx * convertor_ut2t;
 
-    imu_data_pub_.publish(imu_msg);
-    imu_mag_pub_.publish(magnetic_msg);
+    imu_temperature_msg.data = imu.temperature;
+
+    imu_data_raw_pub_.publish(imu_data_raw_msg);
+    imu_data_pub_.publish(imu_data_msg);
+    imu_mag_pub_.publish(imu_magnetic_msg);
+    imu_temperature_pub_.publish(imu_temperature_msg);
 
     broadcaster_.sendTransform(tf::StampedTransform(tf::Transform(tf::createQuaternionFromRPY(roll, pitch, yaw),
-                                                                 tf::Vector3(0.0, 0.0, 0.1)),
+                                                                  tf::Vector3(0.0, 0.0, 0.1)),
                                                    ros::Time::now(), "imu_base", "imu"));
   }
 };
