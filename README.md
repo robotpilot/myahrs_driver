@@ -51,7 +51,7 @@ roslaunch myahrs_driver myahrs_driver.launch
 please see the http://wiki.ros.org/myahrs_driver
 
 
-== Communication Protocol Manual and Forum ==
+# Communication Protocol Manual and Forum
 
 The myAHRS+ protocol can be found here(https://github.com/withrobot/myAHRS_plus/tree/master/tutorial). The Forum for myAHRS+ user can be found here(http://forum.odroid.com/viewforum.php?f=109).
 
