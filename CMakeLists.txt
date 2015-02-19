@@ -3,6 +3,7 @@ project(myahrs_driver)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  std_msgs
   sensor_msgs
   tf
 )
@@ -10,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES myahrs_driver
-  CATKIN_DEPENDS roscpp sensor_msgs tf
+  CATKIN_DEPENDS roscpp std_msgs sensor_msgs tf
   DEPENDS system_lib
 )
 

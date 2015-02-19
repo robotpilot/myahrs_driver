@@ -40,19 +40,23 @@
 using namespace WithRobot;
 
 //------------------------------------------------------------------------------
-void handle_error(const char* error_msg)
-{
-  fprintf(stderr, "ERROR: %s\n", error_msg);
-  exit(1);
-}
-
-//------------------------------------------------------------------------------
 class MyAhrsDriverForROS : public iMyAhrsPlus
 {
 private:
   ros::NodeHandle nh_;
   ros::NodeHandle nh_priv_;
 
+  ros::Publisher imu_data_raw_pub_;
+  ros::Publisher imu_data_pub_;
+  ros::Publisher imu_mag_pub_;
+  ros::Publisher imu_temperature_pub_;
+
+  tf::TransformBroadcaster broadcaster_;
+
+  Platform::Mutex lock_;
+  SensorData sensor_data_;
+
+  std::string parent_frame_id_;
   std::string frame_id_;
   double linear_acceleration_stddev_;
   double angular_velocity_stddev_;
@@ -72,24 +76,14 @@ private:
   }
 
 public:
-  ros::Publisher imu_data_raw_pub_;
-  ros::Publisher imu_data_pub_;
-  ros::Publisher imu_mag_pub_;
-  ros::Publisher imu_temperature_pub_;
-  Platform::Mutex lock_;
-  SensorData sensor_data_;
-  tf::TransformBroadcaster broadcaster_;
-
-  std::string port_;
-  int baud_rate_;
-
-  MyAhrsDriverForROS(std::string port="", unsigned int baudrate=115200)
-  : iMyAhrsPlus(port, baudrate),
+  MyAhrsDriverForROS(std::string port="", int baud_rate=115200)
+  : iMyAhrsPlus(port, baud_rate),
     nh_priv_("~")
   {
-    nh_priv_.param("port", port_, std::string("/dev/ttyACM0"));
-    nh_priv_.param("baud", baud_rate_, 115200);
+    nh_priv_.setParam("port", port);
+    nh_priv_.setParam("baud_rate", baud_rate);
     nh_priv_.param("frame_id", frame_id_, std::string("imu_link"));
+    nh_priv_.param("parent_frame_id_", parent_frame_id_, std::string("base_link"));
     nh_priv_.param("linear_acceleration_stddev", linear_acceleration_stddev_, 0.0);
     nh_priv_.param("angular_velocity_stddev", angular_velocity_stddev_, 0.0);
     nh_priv_.param("magnetic_field_stddev", magnetic_field_stddev_, 0.0);
@@ -174,7 +168,7 @@ public:
     static double convertor_d2r  = M_PI/180.0; // for angular_velocity (degree to radian)
     static double convertor_r2d  = 180.0/M_PI; // for easy understanding (radian to degree)
     static double convertor_ut2t = 1/1000000;  // for magnetic_field (uT to Tesla)
-    static double convertor_c    = 1;          // for temperature (celsius)
+    static double convertor_c    = 1.0;        // for temperature (celsius)
 
     double roll, pitch, yaw;
 
@@ -191,14 +185,12 @@ public:
 
     ros::Time now = ros::Time::now();
 
-    //nh_priv_.getParam("frame_id", frame_id_);
-
-    imu_data_raw_msg.header.stamp = now;
-    imu_data_msg.header.stamp = now;
+    imu_data_raw_msg.header.stamp =
+    imu_data_msg.header.stamp     =
     imu_magnetic_msg.header.stamp = now;
 
-    imu_data_raw_msg.header.frame_id = frame_id_;
-    imu_data_msg.header.frame_id = frame_id_;
+    imu_data_raw_msg.header.frame_id =
+    imu_data_msg.header.frame_id     =
     imu_magnetic_msg.header.frame_id = frame_id_;
 
     // orientation
@@ -230,16 +222,19 @@ public:
     imu_magnetic_msg.magnetic_field.y = -imu.my * convertor_ut2t;
     imu_magnetic_msg.magnetic_field.z = -imu.mz * convertor_ut2t;
 
+    // original data used the celsius unit
     imu_temperature_msg.data = imu.temperature;
 
+    // publish the IMU data
     imu_data_raw_pub_.publish(imu_data_raw_msg);
     imu_data_pub_.publish(imu_data_msg);
     imu_mag_pub_.publish(imu_magnetic_msg);
     imu_temperature_pub_.publish(imu_temperature_msg);
 
+    // publish tf
     broadcaster_.sendTransform(tf::StampedTransform(tf::Transform(tf::createQuaternionFromRPY(roll, pitch, yaw),
-                                                                  tf::Vector3(0.0, 0.0, 0.1)),
-                                                   ros::Time::now(), frame_id_, "base"));
+                                                                  tf::Vector3(0.0, 0.0, 0.0)),
+                                                    ros::Time::now(), frame_id_, parent_frame_id_));
   }
 };
 
@@ -249,20 +244,25 @@ int main(int argc, char* argv[])
 {
   ros::init(argc, argv, "myahrs_driver");
 
-  MyAhrsDriverForROS sensor("/dev/ttyACM1", 115200);
+  std::string port = std::string("/dev/ttyACM0");
+  int baud_rate    = 115200;
+
+  ros::param::get("~port", port);
+  ros::param::get("~baud_rate", baud_rate);
+
+  MyAhrsDriverForROS sensor(port, baud_rate);
 
   if(sensor.initialize() == false)
   {
-    handle_error("initialize() returns false");
+    ROS_ERROR("%s\n", "initialize() returns false");
+    return 0;
   }
-
-  ros::Rate loop_rate(100); // 0.01sec
-
-  while (ros::ok())
+  else
   {
-    ros::spinOnce();
-    loop_rate.sleep();
+    ROS_INFO("Initialization OK!\n");
   }
+
+  ros::spin();
 
   return 0;
 }

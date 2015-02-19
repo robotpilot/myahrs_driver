@@ -6,6 +6,8 @@ This is a driver package for the WITHROBOT's myAHRS+ from http://www.lilliputdir
 
 
 
+# References
+
 References for myAHRS+ board
 
 * http://www.withrobot.com/myahrs_plus_en/
