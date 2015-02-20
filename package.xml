@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>myahrs_driver</name>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <license>BSD</license>
   <description>myahrs_driver is a driver package for the WITHROBOT's myAHRS+. The myAHRS+ is a low cost high performance AHRS(Attitude Heading Reference System) with USB/UART/I2C interface. The myAHRS+ board contains a 3-axis 16-bit gyroscope, a 3-axis 16-bit accelerometer and a 3-axis 13-bit magnetometer. The driver should also work with USB port.</description>
 
