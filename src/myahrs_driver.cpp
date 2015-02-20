@@ -2,6 +2,8 @@
 // Copyright (c) 2015, Yoonseok Pyo
 // All rights reserved.
 
+// License: BSD
+
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 
@@ -76,19 +78,24 @@ private:
   }
 
 public:
+  double tmp_=0.0;
   MyAhrsDriverForROS(std::string port="", int baud_rate=115200)
   : iMyAhrsPlus(port, baud_rate),
     nh_priv_("~")
   {
+    // dependent on user device
     nh_priv_.setParam("port", port);
     nh_priv_.setParam("baud_rate", baud_rate);
+    // default frame id
     nh_priv_.param("frame_id", frame_id_, std::string("imu_link"));
+    // for testing the tf
     nh_priv_.param("parent_frame_id_", parent_frame_id_, std::string("base_link"));
-    nh_priv_.param("linear_acceleration_stddev", linear_acceleration_stddev_, 0.0);
-    nh_priv_.param("angular_velocity_stddev", angular_velocity_stddev_, 0.0);
-    nh_priv_.param("magnetic_field_stddev", magnetic_field_stddev_, 0.0);
-    nh_priv_.param("orientation_stddev", orientation_stddev_, 0.0);
-
+    // defaults obtained experimentally from device
+    nh_priv_.param("linear_acceleration_stddev", linear_acceleration_stddev_, 0.026831);
+    nh_priv_.param("angular_velocity_stddev", angular_velocity_stddev_, 0.002428);
+    nh_priv_.param("magnetic_field_stddev", magnetic_field_stddev_, 0.00000327486);
+    nh_priv_.param("orientation_stddev", orientation_stddev_, 0.002143);
+    // publisher for streaming
     imu_data_raw_pub_   = nh_.advertise<sensor_msgs::Imu>("imu/data_raw", 1);
     imu_data_pub_       = nh_.advertise<sensor_msgs::Imu>("imu/data", 1);
     imu_mag_pub_        = nh_.advertise<sensor_msgs::MagneticField>("imu/mag", 1);
@@ -167,7 +174,7 @@ public:
     static double convertor_g2a  = 9.80665;    // for linear_acceleration (g to m/s^2)
     static double convertor_d2r  = M_PI/180.0; // for angular_velocity (degree to radian)
     static double convertor_r2d  = 180.0/M_PI; // for easy understanding (radian to degree)
-    static double convertor_ut2t = 1/1000000;  // for magnetic_field (uT to Tesla)
+    static double convertor_ut2t = 1000000;    // for magnetic_field (uT to Tesla)
     static double convertor_c    = 1.0;        // for temperature (celsius)
 
     double roll, pitch, yaw;
@@ -216,11 +223,9 @@ public:
     imu_data_msg.angular_velocity.z     = -imu.gz * convertor_d2r;
 
     // original data used the uTesla unit, convert to Tesla
-    // known issue: original data's range is ± 1200 uT.
-    // I think that the converted Tesla is an inconvenient unit to check the IMU's magnetic data.
-    imu_magnetic_msg.magnetic_field.x =  imu.mx * convertor_ut2t;
-    imu_magnetic_msg.magnetic_field.y = -imu.my * convertor_ut2t;
-    imu_magnetic_msg.magnetic_field.z = -imu.mz * convertor_ut2t;
+    imu_magnetic_msg.magnetic_field.x =  imu.mx / convertor_ut2t;
+    imu_magnetic_msg.magnetic_field.y = -imu.my / convertor_ut2t;
+    imu_magnetic_msg.magnetic_field.z = -imu.mz / convertor_ut2t;
 
     // original data used the celsius unit
     imu_temperature_msg.data = imu.temperature;
@@ -254,7 +259,7 @@ int main(int argc, char* argv[])
 
   if(sensor.initialize() == false)
   {
-    ROS_ERROR("%s\n", "initialize() returns false");
+    ROS_ERROR("%s\n", "Initialize() returns false, please check your devices.");
     return 0;
   }
   else

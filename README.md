@@ -4,7 +4,7 @@
 
 This is a driver package for the WITHROBOT's myAHRS+ from http://www.lilliputdirect.com/odroid-myahrs|lilliputdirect and http://www.hardkernel.com/main/products/prdt_info.php?g_code=G141464363369 . The myAHRS+ is a low cost high performance AHRS(Attitude Heading Reference System) with USB/UART/I2C interface. The myAHRS+ board contains a 3-axis 16-bit gyroscope, a 3-axis 16-bit accelerometer and a 3-axis 13-bit magnetometer. The driver should also work with USB port.
 
-## Axes Convention
+### Axes Convention
 
 The myAHRS+ board used NED type. The myahrs_driver contained in this package converts to the frame conventions of ROS (use the east north up (ENU) convention and right hand rule) before publishing the msgs. The driver use the coordinate frame below. Please see http://www.ros.org/reps/rep-0103.html#axis-orientation for more information.
 
@@ -16,13 +16,13 @@ The myAHRS+ board used NED type. The myahrs_driver contained in this package con
  * NED type IMU: x-north, y-east, z-down, relative to magnetic north.
  * ENU type IMU: x-east, y-north, z-up, relative to magnetic north.
 
-## Original Source
+### Original Source
 
 The original source (not support ROS) is maintained github below and tutorials are on the corresponding wiki page. A 3D visualization test like 3D-box is included in this original source.
 
 https://github.com/withrobot/myAHRS_plus
 
-# Installation
+## Installation
 
 Install the package from the github:
 
@@ -46,19 +46,21 @@ or
 roslaunch myahrs_driver myahrs_driver.launch
 ```
 
-# Nodes
+## Nodes
 
-please see the http://wiki.ros.org/myahrs_driver
+Official ROS documentation can be found on the ROS wiki at:
+
+http://wiki.ros.org/myahrs_driver
 
 
-# Communication Protocol Manual and Forum
+## Communication Protocol Manual and Forum
 
 The myAHRS+ protocol can be found here(https://github.com/withrobot/myAHRS_plus/tree/master/tutorial). The Forum for myAHRS+ user can be found here(http://forum.odroid.com/viewforum.php?f=109).
 
 
-# References
+## References
 
-References for myAHRS+ board
+### References for myAHRS+ board
 
 * http://www.withrobot.com/myahrs_plus_en/
 * http://www.withrobot.com/?wpdmact=process&did=MTE4LmhvdGxpbms=
@@ -67,13 +69,13 @@ References for myAHRS+ board
 * http://www.hardkernel.com/main/products/prdt_info.php?g_code=G141464363369
 * http://www.lilliputdirect.com/odroid-myahrs
 
-References for convention of axes and unit
+### References for convention of axes and unit
 
 * http://www.ros.org/reps/rep-0003.html
 * http://www.ros.org/reps/rep-0103.html
 * https://github.com/paulbovbel/rep/blob/master/rep-0145.rst
 
-References for similar IMU packages
+### References for similar IMU packages
 
 * http://wiki.ros.org/um6
 * http://wiki.ros.org/razor_imu_9dof
