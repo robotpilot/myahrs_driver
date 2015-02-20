@@ -18,9 +18,15 @@ The myAHRS+ board used NED type. The myahrs_driver contained in this package con
 
 ### Original Source
 
-The original source (not support ROS) is maintained github below and tutorials are on the corresponding wiki page. A 3D visualization test like 3D-box is included in this original source.
+The original source (not support ROS) is maintained github below and tutorials are on the corresponding wiki page. A 3D visualization test like 3D-box is included in this original source. This package used the myAHRS+ SDK below.
 
 https://github.com/withrobot/myAHRS_plus
+
+## Video
+
+This is a visualization demonstration using RViz.
+
+[![test](http://img.youtube.com/vi/j5v5fKppcQo/0.jpg)](http://www.youtube.com/watch?v=j5v5fKppcQo)
 
 ## Installation
 
