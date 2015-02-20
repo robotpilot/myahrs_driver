@@ -78,7 +78,6 @@ private:
   }
 
 public:
-  double tmp_=0.0;
   MyAhrsDriverForROS(std::string port="", int baud_rate=115200)
   : iMyAhrsPlus(port, baud_rate),
     nh_priv_("~")
