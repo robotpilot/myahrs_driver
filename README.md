@@ -30,6 +30,12 @@ This is a visualization demonstration using RViz.
 
 ## Installation
 
+Install the package:
+
+```sh
+sudo apt-get install ros-indigo-myahrs-driver
+```
+
 Install the package from the github:
 
 ```sh
