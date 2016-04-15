@@ -57,7 +57,7 @@ private:
 
   Platform::Mutex lock_;
   SensorData sensor_data_;
-
+  bool publish_tf;
   std::string parent_frame_id_;
   std::string frame_id_;
   double linear_acceleration_stddev_;
@@ -85,6 +85,8 @@ public:
     // dependent on user device
     nh_priv_.setParam("port", port);
     nh_priv_.setParam("baud_rate", baud_rate);
+    //CHANGED 
+    nh_priv_.param("publish_tf", publish_tf, false);
     // default frame id
     nh_priv_.param("frame_id", frame_id_, std::string("imu_link"));
     // for testing the tf
@@ -236,9 +238,12 @@ public:
     imu_temperature_pub_.publish(imu_temperature_msg);
 
     // publish tf
-    broadcaster_.sendTransform(tf::StampedTransform(tf::Transform(tf::createQuaternionFromRPY(roll, pitch, yaw),
+    if(publish_tf)
+      {
+	broadcaster_.sendTransform(tf::StampedTransform(tf::Transform(tf::createQuaternionFromRPY(roll, pitch, yaw),
                                                                   tf::Vector3(0.0, 0.0, 0.0)),
                                                     ros::Time::now(), frame_id_, parent_frame_id_));
+      }
   }
 };
 
