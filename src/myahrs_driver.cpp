@@ -85,7 +85,6 @@ public:
     // dependent on user device
     nh_priv_.setParam("port", port);
     nh_priv_.setParam("baud_rate", baud_rate);
-    //CHANGED 
     nh_priv_.param("publish_tf", publish_tf, false);
     // default frame id
     nh_priv_.param("frame_id", frame_id_, std::string("imu_link"));
