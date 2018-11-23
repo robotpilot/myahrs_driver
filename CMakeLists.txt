@@ -29,7 +29,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES myahrs_driver
   CATKIN_DEPENDS roscpp std_msgs sensor_msgs tf
-  DEPENDS system_lib
+  DEPENDS
 )
 
 ################################################################################
