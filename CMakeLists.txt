@@ -1,75 +1,78 @@
-################################################################################
-# CMake
-################################################################################
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(myahrs_driver)
 
-################################################################################
-# Packages
-################################################################################
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  std_msgs
-  sensor_msgs
-  tf
-)
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
+endif()
 
-################################################################################
-# Declare ROS messages, services and actions
-################################################################################
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
-################################################################################
-# Declare ROS dynamic reconfigure parameters
-################################################################################
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
-################################################################################
-# Catkin specific configuration
-################################################################################
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES myahrs_driver
-  CATKIN_DEPENDS roscpp std_msgs sensor_msgs tf
-  DEPENDS
-)
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_msgs REQUIRED)
 
-################################################################################
-# Build
-################################################################################
+# uncomment the following section in order to fill in
+# further dependencies manually.
+# find_package(<dependency> REQUIRED)
+
 include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
+  include 
 )
 
-add_executable(myahrs_driver src/myahrs_driver.cpp)
-add_dependencies(myahrs_driver ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(myahrs_driver ${catkin_LIBRARIES})
+set(EXECUTABLE_NAME "myahrs_driver")
 
-# I knew the REP0003(http://www.ros.org/reps/rep-0003.html#c),
-# but the code of "myAHRS SDK" must compile with C++11.
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-
-
-################################################################################
-# Install
-################################################################################
-install(TARGETS myahrs_driver
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+set(SOURCES
+  src/main.cpp 
+  src/myahrs_ros2_driver.cpp
 )
 
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+add_executable(${EXECUTABLE_NAME} ${SOURCES})
+
+set(dependencies
+  "rclcpp"
+  "std_msgs"
+  "sensor_msgs"
+  "geometry_msgs"
+  "tf2"
+  "tf2_ros"
+  "tf2_msgs"
 )
 
-install(DIRECTORY launch
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+ament_target_dependencies(${EXECUTABLE_NAME} ${dependencies})
+
+install(TARGETS ${EXECUTABLE_NAME}
+  DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY rviz_cfg
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
-################################################################################
-# Test
-#############################################################################
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # uncomment the line when a copyright and license is not present in all source files
+  #set(ament_cmake_copyright_FOUND TRUE)
+  # the following line skips cpplint (only works in a git repo)
+  # uncomment the line when this package is not in a git repo
+  #set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_package()

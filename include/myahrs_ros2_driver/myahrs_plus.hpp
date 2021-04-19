@@ -1459,9 +1459,9 @@ namespace WithRobot {
         }
     };
 
-    void DirectionCosineMatrix::set(Quaternion& q) {
-        *this = q.to_dcm();
-    }
+    // void DirectionCosineMatrix::set(Quaternion& q) {
+    //     *this = q.to_dcm();
+    // }
 
 
     /**************************************************************************
