@@ -1,23 +1,26 @@
 <?xml version="1.0"?>
-<package>
-  <name>myahrs_driver</name>
-  <version>0.1.2</version>
-  <description>
-    myahrs_driver is a driver package for the WITHROBOT's myAHRS+. The myAHRS+ is a low cost high performance AHRS(Attitude Heading Reference System) with USB/UART/I2C interface. The myAHRS+ board contains a 3-axis 16-bit gyroscope, a 3-axis 16-bit accelerometer and a 3-axis 13-bit magnetometer. The driver should also work with USB port.
-  </description>
-  <license>BSD</license>
-  <author email="pyo@robotis.com">Yoonseok Pyo</author>
-  <maintainer email="pyo@robotis.com">Yoonseok Pyo</maintainer>
-  <url type="bugtracker">https://github.com/robotpilot/myahrs_driver/issues</url>
-  <url type="repository">https://github.com/robotpilot/myahrs_driver</url>
-  <url type="website">http://wiki.ros.org/myahrs_driver</url>
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>tf</build_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>tf</run_depend>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>myahrs_ros2_driver</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="calc100@clobot.co.kr">ubuntu</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_msgs</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
