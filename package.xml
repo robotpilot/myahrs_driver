@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>myahrs_ros2_driver</name>
+  <name>myahrs_driver</name>
   <version>0.1.0</version>
   <description>myahrs ros2 driver based on https://github.com/robotpilot/myahrs_driver</description>
-  <maintainer email="ros@clobot.co.kr">clobot</maintainer>
-  <license>Apache</license>
+  <license>BSD</license>
+  <author email="ros@clobot.co.kr">clobot</author>
+  <maintainer email="pyo@robotis.com">Yoonseok Pyo</maintainer>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(myahrs_ros2_driver)
+project(myahrs_driver)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -30,10 +30,10 @@ find_package(tf2_msgs REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 include_directories(
-  include include/
+  include 
 )
 
-set(EXECUTABLE_NAME "myahrs_ros2_driver")
+set(EXECUTABLE_NAME "myahrs_driver")
 
 set(SOURCES
   src/main.cpp 
